@@ -24,7 +24,11 @@ func main() {
 
 	name, err := gamelogic.ClientWelcome()
 
-	pubsub.DeclareAndBind(conn, "peril_direct", (routing.PauseKey + "." + name), routing.PauseKey, pubsub.Transient)
+	_, _, errps := pubsub.DeclareAndBind(conn, "peril_direct", (routing.PauseKey + "." + name), routing.PauseKey, pubsub.Transient)
+	if errps != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
 
 	c := make(chan os.Signal, 1)
 

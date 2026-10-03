@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/absoluteKeven/go-pub-sub/internal/gamelogic"
 	pubsub "github.com/absoluteKeven/go-pub-sub/internal/pubsub"
 	routing "github.com/absoluteKeven/go-pub-sub/internal/routing"
 
@@ -26,9 +27,25 @@ func main() {
 		return
 	}
 
-	pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, routing.PlayingState{IsPaused: true})
-
 	fmt.Println("Connection Successful...")
+
+	gamelogic.PrintServerHelp()
+
+	for {
+		cmd := gamelogic.GetInput()
+
+		switch cmd[0] {
+		case routing.PauseKey:
+			pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, routing.PlayingState{IsPaused: true})
+		case "resume":
+			pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, routing.PlayingState{IsPaused: false})
+		case "quit":
+			fmt.Println("Exiting.")
+			break
+		default:
+			fmt.Println("Unknown command.")
+		}
+	}
 
 	c := make(chan os.Signal, 1)
 

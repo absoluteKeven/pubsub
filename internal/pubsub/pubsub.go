@@ -36,6 +36,7 @@ func DeclareAndBind(
 ) (*amqp.Channel, amqp.Queue, error) {
 	ch, errc := conn.Channel()
 	if errc != nil {
+		fmt.Println(errc)
 		return nil, amqp.Queue{}, errc
 	}
 
@@ -46,6 +47,7 @@ func DeclareAndBind(
 
 	err := ch.QueueBind(queueName, key, exchange, false, nil)
 	if err != nil {
+		fmt.Println(err)
 		return nil, amqp.Queue{}, errc
 	}
 

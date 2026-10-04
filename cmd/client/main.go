@@ -31,8 +31,48 @@ func main() {
 	}
 
 	c := make(chan os.Signal, 1)
-
 	signal.Notify(c, os.Interrupt)
-	<-c
-	fmt.Println("Shutting gracefully.")
+
+	go func() {
+		<-c
+		fmt.Println("Shutting gracefully.")
+		conn.Close()
+		os.Exit(0)
+	}()
+
+	gameState := gamelogic.NewGameState(name)
+
+cmdloop:
+	for {
+		cmd := gamelogic.GetInput()
+
+		switch cmd[0] {
+		case "spawn":
+			err := gameState.CommandSpawn(cmd[1:])
+			if err != nil {
+				fmt.Printf("Error spawning unit: %s\n", err)
+			}
+		case "move":
+			move, err := gameState.CommandMove(cmd[1:])
+			if err != nil {
+				fmt.Printf("Error moving unit: %s\n", err)
+				break
+			}
+			fmt.Printf("Moved %i to %s\n", move.Units[0].ID, move.ToLocation)
+		case "status":
+			gameState.CommandStatus()
+			break
+		case "help":
+			gamelogic.PrintClientHelp()
+			break
+		case "spam":
+			fmt.Println("Spamming not alowed.")
+			break
+		case "quit":
+			fmt.Println("Exiting.")
+			break cmdloop
+		default:
+			fmt.Println("Unknown command.")
+		}
+	}
 }
